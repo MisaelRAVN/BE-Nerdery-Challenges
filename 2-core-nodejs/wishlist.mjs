@@ -27,7 +27,7 @@ const loadDataFromFile = async (fileName) => {
   } catch (error) {
     if (error.code !== "ENOENT") {
       console.error(
-        `Encountered an error while trying to read stored data. No data will be loaded.\n${error}\n`
+        `Encountered an error while trying to read stored data. No data will be loaded.\n${error}\n`,
       );
     }
     return [];
@@ -40,27 +40,30 @@ const saveDataLocally = async (fileName) => {
     await fs.writeFile(fileName, jsonData);
   } catch (error) {
     console.error(
-      `Encountered an error while trying to save data locally. No data has been saved.\n${error}`
-    )
+      `Encountered an error while trying to save data locally. No data has been saved.\n${error}`,
+    );
   }
-}
+};
 
 const createWishlistItem = async (item) => {
-  const id = (wishlistDatabase.length > 0) ? wishlistDatabase[wishlistDatabase.length - 1].id + 1 : 1;
+  const id =
+    wishlistDatabase.length > 0
+      ? wishlistDatabase[wishlistDatabase.length - 1].id + 1
+      : 1;
   wishlistDatabase.push({ id, ...item });
   try {
     await saveDataLocally("./wishlist.json");
   } catch (error) {
     console.error(
-      `Encountered an error while trying to save data locally. Item has not been inserted.\n${error}\n`
-    )
+      `Encountered an error while trying to save data locally. Item has not been inserted.\n${error}\n`,
+    );
   }
 };
 
 const findWishlistItem = (id) => {
   const itemIndex = wishlistDatabase.findIndex((record) => record.id === id);
   return itemIndex;
-}
+};
 
 const updateWishlistItem = async (index, updatedItem) => {
   wishlistDatabase[index] = { ...updatedItem };
@@ -68,8 +71,8 @@ const updateWishlistItem = async (index, updatedItem) => {
     await saveDataLocally("./wishlist.json");
   } catch (error) {
     console.error(
-      `Encountered an error while trying to save data locally. Item has not been inserted.\n${error}\n`
-    )
+      `Encountered an error while trying to save data locally. Item has not been inserted.\n${error}\n`,
+    );
   }
 };
 
@@ -86,16 +89,16 @@ const deleteWishlistItem = async (id) => {
     await saveDataLocally("./wishlist.json");
   } catch (error) {
     console.error(
-      `Encountered an error while trying to save data locally. Item has not been removed.\n${error}\n`
-    )
+      `Encountered an error while trying to save data locally. Item has not been removed.\n${error}\n`,
+    );
   }
 };
 
 const promisifiedQuestion = (query) => {
   return new Promise((resolve) => {
     rl.question(query, (answer) => resolve(answer));
-  })
-}
+  });
+};
 
 const askForValidString = async (query, emptyAllowed = false) => {
   while (true) {
@@ -106,7 +109,7 @@ const askForValidString = async (query, emptyAllowed = false) => {
       return value;
     }
   }
-}
+};
 
 const askForValidNumber = async (query, isInteger = false) => {
   while (true) {
@@ -118,7 +121,7 @@ const askForValidNumber = async (query, isInteger = false) => {
       return val;
     }
   }
-}
+};
 
 const askItemCreationOptions = async () => {
   const newItem = { name: null, price: null, store: null };
@@ -131,13 +134,16 @@ const askItemCreationOptions = async () => {
     await createWishlistItem(newItem);
   } catch (error) {
     console.error(
-      `Encountered an error while trying to save data locally. Item has not been created.\n${error}\n`
-    )
+      `Encountered an error while trying to save data locally. Item has not been created.\n${error}\n`,
+    );
   }
-}
+};
 
 const askItemUpdatingOptions = async () => {
-  const id = await askForValidNumber("Enter the id of the item you wish to update: ", true);
+  const id = await askForValidNumber(
+    "Enter the id of the item you wish to update: ",
+    true,
+  );
   const itemIndex = findWishlistItem(id);
   if (itemIndex === -1) {
     console.error("The item with the specified id does not exist");
@@ -148,20 +154,29 @@ const askItemUpdatingOptions = async () => {
   updatedItem.price = await askForValidNumber("Enter the item price: ");
   updatedItem.store = await askForValidString("Enter the store name: ");
   await updateWishlistItem(itemIndex, updatedItem);
-}
+};
 
 const askItemDeletionOptions = async () => {
-  const id = await askForValidNumber("Enter the id of the item you wish to remove: ", true);
+  const id = await askForValidNumber(
+    "Enter the id of the item you wish to remove: ",
+    true,
+  );
   await deleteWishlistItem(id);
-}
+};
 
 const close = () => {
   console.log("Bye...");
   process.exit(0);
-}
+};
 
 const processUserRequestedAction = (input) => {
-  const actions = [askItemCreationOptions, showAllItems, askItemUpdatingOptions, askItemDeletionOptions, close];
+  const actions = [
+    askItemCreationOptions,
+    showAllItems,
+    askItemUpdatingOptions,
+    askItemDeletionOptions,
+    close,
+  ];
   const maxAvailableOption = actions.length;
 
   const option = parseInt(input);
@@ -182,19 +197,17 @@ const onLine = async (line) => {
   } else {
     if (typeof action === "string") {
       process.stdout.write(action);
-    }
-    else {
+    } else {
       await action();
     }
   }
   showMenuOptions();
 };
 
-
 rl.on("line", onLine);
 
 const main = async () => {
   wishlistDatabase = await loadDataFromFile("./wishlist.json");
   showMenuOptions();
-}
+};
 main();
