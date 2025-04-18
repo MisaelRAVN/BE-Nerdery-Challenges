@@ -31,22 +31,27 @@ const {
  * @returns {Promise<User[]>} A promise that resolves to an array of users who dislike more movies than they like.
  */
 const getUsersWithMoreDislikedMoviesThanLikedMovies = () => {
-  let harshestUsers = [];
+  const harshestUsers = [];
   return new Promise((resolve, reject) => {
     Promise.all([getUsers(), getLikedMovies(), getDislikedMovies()])
       .then(([users, likedMovies, dislikedMovies]) => {
+        const getUserRatedMoviesCount = (user, movies) => {
+          const userRatedMovies = movies.find(
+            (ratedMovie) => ratedMovie.userId === user.id,
+          );
+          const userRatedMoviesCount = userRatedMovies?.movies.length ?? 0;
+          return userRatedMoviesCount;
+        };
+
         for (const user of users) {
-          const userLikedMovies = likedMovies.find(
-            (likedMovie) => likedMovie.userId === user.id,
-          );
-          const likedMoviesCount = userLikedMovies?.movies.length ?? 0;
+          const [dislikedMoviesCount, likedMoviesCount] = [
+            getUserRatedMoviesCount(user, dislikedMovies),
+            getUserRatedMoviesCount(user, likedMovies),
+          ];
 
-          const userDislikedMovies = dislikedMovies.find(
-            (dislikedMovie) => dislikedMovie.userId === user.id,
-          );
-          const dislikedMoviesCount = userDislikedMovies?.movies.length ?? 0;
-
-          if (dislikedMoviesCount > likedMoviesCount) harshestUsers.push(user);
+          if (dislikedMoviesCount > likedMoviesCount) {
+            harshestUsers.push(user);
+          }
         }
       })
       .catch((error) => reject(error))
@@ -61,4 +66,4 @@ getUsersWithMoreDislikedMoviesThanLikedMovies()
       console.log(id, name, age);
     });
   })
-  .catch((err) => console.log(err));
+  .catch((error) => console.log(error));
