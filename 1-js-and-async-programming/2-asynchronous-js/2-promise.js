@@ -15,7 +15,7 @@
 const {
   getUsers,
   getLikedMovies,
-  getDislikedMovies
+  getDislikedMovies,
 } = require("./utils/mocked-api");
 
 /**
@@ -33,35 +33,32 @@ const {
 const getUsersWithMoreDislikedMoviesThanLikedMovies = () => {
   let harshestUsers = [];
   return new Promise((resolve, reject) => {
-    Promise.all([
-      getUsers(),
-      getLikedMovies(),
-      getDislikedMovies()
-    ])
-    .then(([users, likedMovies, dislikedMovies]) => {
-      for (const user of users) {
-        const userLikedMovies = likedMovies.find(
-          (likedMovie) => likedMovie.userId === user.id
-        );
-        const likedMoviesCount = userLikedMovies?.movies.length ?? 0;
+    Promise.all([getUsers(), getLikedMovies(), getDislikedMovies()])
+      .then(([users, likedMovies, dislikedMovies]) => {
+        for (const user of users) {
+          const userLikedMovies = likedMovies.find(
+            (likedMovie) => likedMovie.userId === user.id,
+          );
+          const likedMoviesCount = userLikedMovies?.movies.length ?? 0;
 
-        const userDislikedMovies = dislikedMovies.find(
-          (dislikedMovie) => dislikedMovie.userId === user.id
-        );
-        const dislikedMoviesCount = userDislikedMovies?.movies.length ?? 0;
+          const userDislikedMovies = dislikedMovies.find(
+            (dislikedMovie) => dislikedMovie.userId === user.id,
+          );
+          const dislikedMoviesCount = userDislikedMovies?.movies.length ?? 0;
 
-        if (dislikedMoviesCount > likedMoviesCount)
-          harshestUsers.push(user);
-      }
-    })
-    .catch(error => reject(error))
-    .finally(() => resolve(harshestUsers));
+          if (dislikedMoviesCount > likedMoviesCount) harshestUsers.push(user);
+        }
+      })
+      .catch((error) => reject(error))
+      .finally(() => resolve(harshestUsers));
   });
 };
 
-getUsersWithMoreDislikedMoviesThanLikedMovies().then((users) => {
-  console.log("Users with more disliked movies than liked movies:");
-  users.forEach(({ id, name, age }) => {
-    console.log(id, name, age);
-  });
-});
+getUsersWithMoreDislikedMoviesThanLikedMovies()
+  .then((users) => {
+    console.log("Users with more disliked movies than liked movies:");
+    users.forEach(({ id, name, age }) => {
+      console.log(id, name, age);
+    });
+  })
+  .catch((err) => console.log(err));
