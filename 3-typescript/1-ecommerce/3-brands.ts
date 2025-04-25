@@ -1,3 +1,5 @@
+import { Brand, Product } from "./1-types";
+
 /**
  *  Challenge 4: Get Countries with Brands and Amount of Products
  *
@@ -12,10 +14,36 @@
  * - The return should be a type that allow us to define the country name as a key and the amount of products as a value.
  */
 
-async function getCountriesWithBrandsAndProductCount(
-  brands: unknown[],
-  products: unknown[],
-): Promise<unknown> {
-  // Implement the function logic here
-  return;
+export type CountriesInfo = Record<string, number>;
+
+export async function getCountriesWithBrandsAndProductCount(
+  brands: Brand[],
+  products: Product[],
+): Promise<CountriesInfo> {
+  const brandCountryLookup: Map<number, string> = brands.reduce((acc, curr) => {
+    const { id, headquarters } = curr;
+
+    const locations: string[] = headquarters.split(" ");
+    const country: string = locations[locations.length - 1];
+
+    const brandId: number = typeof id === "number" ? id : parseInt(id);
+    acc.set(brandId, country);
+    return acc;
+  }, new Map<number, string>());
+
+  const availableProducts: Product[] = products.filter((product) =>
+    brandCountryLookup.has(product.brandId),
+  );
+  const countriesWithBrandsAndProducts: CountriesInfo =
+    availableProducts.reduce<CountriesInfo>((acc, curr) => {
+      const country: string = brandCountryLookup.get(curr.brandId)!;
+      if (acc[country]) {
+        acc[country]++;
+      } else {
+        acc[country] = 1;
+      }
+      return acc;
+    }, {});
+
+  return countriesWithBrandsAndProducts;
 }
