@@ -10,6 +10,16 @@
 
 
 -- your query here
+SELECT
+  c.name category,
+  COUNT(fc.film_id) film_count
+FROM
+  category c
+  INNER JOIN film_category fc USING(category_id)
+GROUP BY
+  category
+ORDER BY
+  category;
 
 
  /*
@@ -22,21 +32,47 @@
  */
 
  -- your query here
+SELECT
+  c.first_name,
+  c.last_name,
+  SUM(p.amount) total_spent
+FROM
+  customer c
+  INNER JOIN payment p USING(customer_id)
+GROUP BY
+  first_name,
+  last_name
+ORDER BY
+  total_spent DESC
+LIMIT 5;
 
 
 
 
 /*
     Challenge 3.
-    Write a SQL query that lists all film titles that have not been rented in the past 10 years in the Pagila database.
+    Write a SQL query that lists all film titles that have been rented in the past 10 years in the Pagila database.
     - The query should return one column: title
-    - title should display the name of each film that hasn't been rented
+    - title should display the name of each film that has been rented
     - The time period for "recent" should be within the last 10 years from the current date
-    - Results should only include films that have no rental records in this time period
+    - Results should only include films that have rental records in this time period
 */
 
 
 -- your query here
+SELECT
+  f.title,
+  MAX(r.rental_date)
+FROM
+  film f
+  INNER JOIN inventory USING(film_id)
+  INNER JOIN rental r USING(inventory_id)
+GROUP BY
+  title
+HAVING
+  MAX(r.rental_date) >= NOW() - INTERVAL '10 years'
+ORDER BY
+  title;
 
 
 /*
@@ -49,6 +85,15 @@
 
 
 -- your query here
+SELECT
+  f.title,
+  i.inventory_id
+FROM
+  film f
+  INNER JOIN inventory i USING(film_id)
+  LEFT JOIN rental r USING(inventory_id)
+WHERE
+  r.inventory_id IS NULL;
 
 
 
@@ -60,7 +105,34 @@
     - title should display the name of each film
     - rental_count should show the total number of times the film was rented
 */
+WITH film_rental_count AS (
+  SELECT
+    f.title,
+    COUNT(r.rental_id) rental_count
+  FROM
+    film f
+    INNER JOIN inventory i USING(film_id)
+    INNER JOIN rental r USING(inventory_id)
+  GROUP BY
+    title
+  ORDER BY
+    title
+)
 
+SELECT
+  title,
+  rental_count
+FROM
+  film_rental_count
+WHERE
+  rental_count > (
+    SELECT
+      AVG(rental_count)
+    FROM
+      film_rental_count
+  )
+ORDER BY
+  title;
 
 
 -- your query here
@@ -76,6 +148,20 @@
 */
 
 -- your query here
+SELECT
+  c.first_name,
+  c.last_name,
+  MIN(r.rental_date) first_rental,
+  MAX(r.rental_date) last_rental,
+  MAX(r.rental_date) - MIN(r.rental_date) rental_span_days
+FROM
+  customer c
+  INNER JOIN rental r USING(customer_id)
+GROUP BY
+  first_name,
+  last_name
+ORDER BY
+  rental_span_days DESC;
 
 /*
     Challenge 7.
@@ -86,6 +172,29 @@
 
 
 -- your query here
+SELECT
+  c.first_name,
+  c.last_name
+FROM
+  customer c
+  INNER JOIN rental USING(customer_id)
+  INNER JOIN inventory USING(inventory_id)
+  INNER JOIN film USING(film_id)
+  INNER JOIN film_category USING(film_id)
+  INNER JOIN category cat USING(category_id)
+GROUP BY
+  first_name,
+  last_name
+HAVING
+  COUNT(DISTINCT cat.category_id) < (
+    SELECT
+      COUNT(category_id)
+    FROM
+      category
+  )
+ORDER BY
+  first_name,
+  last_name;
 
 /*
     Bonus Challenge 8 (opt)
