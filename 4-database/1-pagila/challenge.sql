@@ -207,5 +207,21 @@ ORDER BY
 
 -- your query here
 
+-- -- Partial progress
 
-
+-- SELECT
+--   f.title,
+--   c.name category,
+--   COUNT(r.rental_id) rental_count,
+--   SUM(p.amount) total_revenue
+-- FROM
+--   category c
+--   INNER JOIN film_category USING(category_id)
+--   INNER JOIN film f USING(film_id)
+--   INNER JOIN inventory USING(film_id)
+--   INNER JOIN rental r USING(inventory_id)
+--   INNER JOIN payment p USING(rental_id)
+-- GROUP BY
+--   f.title,
+--   category_id,
+--   c.name;
