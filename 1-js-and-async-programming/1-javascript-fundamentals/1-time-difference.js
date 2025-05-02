@@ -16,6 +16,16 @@ timeDifference(7200, 3400); // Expected output: "01:03:20"
 
 */
 
-const timeDifference = (a, b) => {};
+const timeDifference = (a, b) => {
+    const differenceInSecs = Math.abs(a - b);
+
+    const hours = Math.floor(differenceInSecs / 3600);
+    const remainingSeconds = differenceInSecs % 3600;
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    const parseTimeUnit = (timeUnit) => timeUnit.toString().padStart(2, '0');
+    return `${parseTimeUnit(hours)}:${parseTimeUnit(minutes)}:${parseTimeUnit(seconds)}`;
+};
 
 module.exports = timeDifference;
