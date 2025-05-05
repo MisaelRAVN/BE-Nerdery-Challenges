@@ -37,11 +37,7 @@ export async function getCountriesWithBrandsAndProductCount(
   const countriesWithBrandsAndProducts: CountriesInfo =
     availableProducts.reduce<CountriesInfo>((acc, curr) => {
       const country: string = brandCountryLookup.get(curr.brandId)!;
-      if (acc[country]) {
-        acc[country]++;
-      } else {
-        acc[country] = 1;
-      }
+      acc[country] = (acc[country] || 0) + 1;
       return acc;
     }, {});
 
