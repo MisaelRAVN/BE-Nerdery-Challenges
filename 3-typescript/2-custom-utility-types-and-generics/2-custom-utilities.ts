@@ -178,7 +178,8 @@ type MyAwaited<T> =
     ? ResolvedType extends Promise<infer DeeperPromise>
       ? MyAwaited<DeeperPromise>
       : ResolvedType
-    : T;
+    : T; // If T does not extend a promise, it is intentionally returning T as-is
+         // to match the behaviour of the actual built-in Awaited utility type
 
 // Add here your example
 type DeepExampleType = Promise<Promise<Promise<Promise<string>>>>;
