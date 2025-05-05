@@ -23,8 +23,8 @@ export async function getCountriesWithBrandsAndProductCount(
   const brandCountryLookup: Map<number, string> = brands.reduce((acc, curr) => {
     const { id, headquarters } = curr;
 
-    const locations: string[] = headquarters.split(" ");
-    const country: string = locations[locations.length - 1];
+    const locations: string[] = headquarters.split(",");
+    const country: string = locations[locations.length - 1].trim();
 
     const brandId: number = typeof id === "number" ? id : parseInt(id);
     acc.set(brandId, country);
