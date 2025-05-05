@@ -28,9 +28,9 @@ interface Image {
 interface Specification {
   material: string;
   weight: string;
+  closure: string;
   cushioning?: string;
   insulation?: string;
-  closure: string;
   archSupport?: string;
   shaftHeight?: string;
   ankleSupport?: string;
@@ -60,8 +60,6 @@ export interface Product {
   metaTagDescription: string;
   supplierId: number;
   showWithoutStock: boolean;
-  adWordsRemarketingCode?: string;
-  lomadeeCampaignCode?: string;
   score: number;
   price: number;
   salePrice: number | null;
@@ -71,6 +69,8 @@ export interface Product {
   tags: string[];
   images: Image[];
   specifications: Specification;
+  adWordsRemarketingCode?: string;
+  lomadeeCampaignCode?: string;
 }
 
 // CATEGORIES JSON
