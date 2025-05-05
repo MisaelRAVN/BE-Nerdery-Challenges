@@ -46,8 +46,8 @@ export async function getDepartmentsWithProductCount(
     availableDepartments.map((department) => {
       const { id, name } = department;
       return {
-        id: id,
-        name: name,
+        id,
+        name,
         ...productDepartmentLookup.get(id)!,
       };
     });
