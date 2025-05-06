@@ -44,12 +44,12 @@ const getUsersWithMoreDislikedMoviesThanLikedMovies = () => {
       const dislikedMoviesCount = getMovieCountMapByUserId(dislikedMovies);
 
       return users.filter((user) => {
-        const likedMovies = likedMoviesCount.get(user.id) ?? 0;
-        const dislikedMovies = dislikedMoviesCount.get(user.id) ?? 0;
-        return dislikedMovies > likedMovies;
+        const likes = likedMoviesCount.get(user.id) ?? 0;
+        const dislikes = dislikedMoviesCount.get(user.id) ?? 0;
+        return dislikes > likes;
       });
     })
-    .catch((error) => reject(error));
+    .catch((error) => console.log(error));
 };
 
 getUsersWithMoreDislikedMoviesThanLikedMovies()
