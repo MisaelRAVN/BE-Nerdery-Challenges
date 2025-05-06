@@ -21,7 +21,7 @@ Type in the option you want to perform: `);
 
 const loadDataFromFile = async (fileName) => {
   try {
-    const rawData = await fs.readFile(fileName);
+    const rawData = await fs.readFile(new URL(fileName, import.meta.url));
     const jsonData = JSON.parse(rawData);
     return jsonData;
   } catch (error) {
@@ -37,7 +37,7 @@ const loadDataFromFile = async (fileName) => {
 const saveDataLocally = async (fileName) => {
   const jsonData = JSON.stringify(wishlistDatabase);
   try {
-    await fs.writeFile(fileName, jsonData);
+    await fs.writeFile(new URL(fileName, import.meta.url), jsonData);
   } catch (error) {
     console.error(
       `Encountered an error while trying to save data locally. No data has been saved.\n${error}`,
