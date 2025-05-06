@@ -35,24 +35,21 @@ const getUsersWithMoreDislikedMoviesThanLikedMovies = () => {
   return new Promise((resolve, reject) => {
     Promise.all([getUsers(), getLikedMovies(), getDislikedMovies()])
       .then(([users, likedMovies, dislikedMovies]) => {
-        const getUserRatedMoviesCount = (user, movies) => {
-          const userRatedMovies = movies.find(
-            (ratedMovie) => ratedMovie.userId === user.id,
-          );
-          const userRatedMoviesCount = userRatedMovies?.movies.length ?? 0;
-          return userRatedMoviesCount;
+        const getMovieCountMapByUserId = (movies) => {
+          return movies.reduce((acc, curr) => {
+            acc.set(curr.userId, curr.movies?.length ?? 0);
+            return acc;
+          }, new Map());
         };
 
-        for (const user of users) {
-          const [dislikedMoviesCount, likedMoviesCount] = [
-            getUserRatedMoviesCount(user, dislikedMovies),
-            getUserRatedMoviesCount(user, likedMovies),
-          ];
+        const likedMoviesCount = getMovieCountMapByUserId(likedMovies);
+        const dislikedMoviesCount = getMovieCountMapByUserId(dislikedMovies);
 
-          if (dislikedMoviesCount > likedMoviesCount) {
-            harshestUsers.push(user);
-          }
-        }
+        return users.filter((user) => {
+          const likedMovies = likedMoviesCount.get(user.id) ?? 0;
+          const dislikedMovies = dislikedMoviesCount.get(user.id) ?? 0;
+          return dislikedMovies > likedMovies;
+        });
       })
       .catch((error) => reject(error))
       .finally(() => resolve(harshestUsers));
