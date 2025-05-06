@@ -100,28 +100,41 @@ const promisifiedQuestion = (query) => {
   });
 };
 
-const askForValidString = async (query, emptyAllowed = false) => {
+const askForValidInput = async (query, isValid) => {
   while (true) {
     const value = await promisifiedQuestion(query);
-    if (!emptyAllowed && value === "") {
-      console.log("You must enter a non-empty string");
-    } else {
+    if (isValid(value)) {
       return value;
     }
   }
-};
+}
+
+const askForValidString = async (query, emptyAllowed = false) => {
+  const isValidString = (input) => {
+    if (!emptyAllowed && input === "") {
+      console.log("You must enter a non-empty string");
+      return false;
+    }
+    return true;
+  }
+
+  const value = await askForValidInput(query, isValidString);
+  return value;
+}
 
 const askForValidNumber = async (query, isInteger = false) => {
-  while (true) {
-    let val = await promisifiedQuestion(query);
-    val = parseFloat(val);
-    if (isNaN(val) || val < 0 || (isInteger && !Number.isInteger(val))) {
+  const isValidNumber = (input) => {
+    const number = parseFloat(input);
+    if (isNaN(number) || number < 0 || (isInteger && !Number.isInteger(number))) {
       console.log("Please, enter a valid number");
-    } else {
-      return val;
+      return false;
     }
+    return true;
   }
-};
+  const value = await askForValidInput(query, isValidNumber);
+
+  return parseFloat(value);
+}
 
 const askItemCreationOptions = async () => {
   const newItem = { name: null, price: null, store: null };
