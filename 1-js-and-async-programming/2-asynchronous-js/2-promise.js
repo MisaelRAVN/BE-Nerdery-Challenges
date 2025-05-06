@@ -31,29 +31,25 @@ const {
  * @returns {Promise<User[]>} A promise that resolves to an array of users who dislike more movies than they like.
  */
 const getUsersWithMoreDislikedMoviesThanLikedMovies = () => {
-  const harshestUsers = [];
-  return new Promise((resolve, reject) => {
-    Promise.all([getUsers(), getLikedMovies(), getDislikedMovies()])
-      .then(([users, likedMovies, dislikedMovies]) => {
-        const getMovieCountMapByUserId = (movies) => {
-          return movies.reduce((acc, curr) => {
-            acc.set(curr.userId, curr.movies?.length ?? 0);
-            return acc;
-          }, new Map());
-        };
+  return Promise.all([getUsers(), getLikedMovies(), getDislikedMovies()])
+    .then(([users, likedMovies, dislikedMovies]) => {
+      const getMovieCountMapByUserId = (movies) => {
+        return movies.reduce((acc, curr) => {
+          acc.set(curr.userId, curr.movies?.length ?? 0);
+          return acc;
+        }, new Map());
+      };
 
-        const likedMoviesCount = getMovieCountMapByUserId(likedMovies);
-        const dislikedMoviesCount = getMovieCountMapByUserId(dislikedMovies);
+      const likedMoviesCount = getMovieCountMapByUserId(likedMovies);
+      const dislikedMoviesCount = getMovieCountMapByUserId(dislikedMovies);
 
-        return users.filter((user) => {
-          const likedMovies = likedMoviesCount.get(user.id) ?? 0;
-          const dislikedMovies = dislikedMoviesCount.get(user.id) ?? 0;
-          return dislikedMovies > likedMovies;
-        });
-      })
-      .catch((error) => reject(error))
-      .finally(() => resolve(harshestUsers));
-  });
+      return users.filter((user) => {
+        const likedMovies = likedMoviesCount.get(user.id) ?? 0;
+        const dislikedMovies = dislikedMoviesCount.get(user.id) ?? 0;
+        return dislikedMovies > likedMovies;
+      });
+    })
+    .catch((error) => reject(error));
 };
 
 getUsersWithMoreDislikedMoviesThanLikedMovies()
