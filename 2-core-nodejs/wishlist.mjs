@@ -109,7 +109,9 @@ const askForValidInput = async (query, isValid) => {
   }
 }
 
-const askForValidString = async (query, emptyAllowed = false) => {
+const askForValidString = async (query, options = {}) => {
+  const emptyAllowed = options.emptyAllowed ?? false;
+
   const isValidString = (input) => {
     if (!emptyAllowed && input === "") {
       console.log("You must enter a non-empty string");
@@ -119,11 +121,17 @@ const askForValidString = async (query, emptyAllowed = false) => {
   }
 
   const value = await askForValidInput(query, isValidString);
-  return value;
+  return value !== "" ? value : null;
 }
 
-const askForValidNumber = async (query, isInteger = false) => {
+const askForValidNumber = async (query, options = {}) => {
+  const emptyAllowed = options.emptyAllowed ?? false;
+  const isInteger = options.isInteger ?? false;
+
   const isValidNumber = (input) => {
+    if (emptyAllowed && input === "") {
+      return true;
+    }
     const number = parseFloat(input);
     if (isNaN(number) || number < 0 || (isInteger && !Number.isInteger(number))) {
       console.log("Please, enter a valid number");
@@ -133,7 +141,7 @@ const askForValidNumber = async (query, isInteger = false) => {
   }
   const value = await askForValidInput(query, isValidNumber);
 
-  return parseFloat(value);
+  return value !== "" ? parseFloat(value) : null;
 }
 
 const askItemCreationOptions = async () => {
@@ -155,17 +163,29 @@ const askItemCreationOptions = async () => {
 const askItemUpdatingOptions = async () => {
   const id = await askForValidNumber(
     "Enter the id of the item you wish to update: ",
-    true,
+    { isInteger: true },
   );
   const itemIndex = findWishlistItem(id);
   if (itemIndex === -1) {
     console.error("The item with the specified id does not exist");
     return;
   }
-  const updatedItem = wishlistDatabase[itemIndex];
-  updatedItem.name = await askForValidString("Enter the item name: ");
-  updatedItem.price = await askForValidNumber("Enter the item price: ");
-  updatedItem.store = await askForValidString("Enter the store name: ");
+  const oldItem = wishlistDatabase[itemIndex];
+
+  const askUpdatePrompt = async (label, defaultValue, askFunction) => {
+    const prompt = `Enter the ${label} (${defaultValue}): `;
+    const newValue = await askFunction(prompt, { emptyAllowed: true });
+    return newValue ?? defaultValue;
+  }
+
+  console.log("Leave blank to skip.");
+  const updatedItem = {
+    id: oldItem.id,
+    name: await askUpdatePrompt("item name", oldItem.name, askForValidString),
+    price: await askUpdatePrompt("item price", oldItem.price, askForValidNumber),
+    store: await askUpdatePrompt("store name", oldItem.store, askForValidString),
+  }
+  
   await updateWishlistItem(itemIndex, updatedItem);
 };
 
