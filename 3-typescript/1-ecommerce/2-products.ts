@@ -99,7 +99,7 @@ export async function analyzeProductPrices(
 
 type BrandMetadata = Omit<Brand, "id" | "isActive">;
 
-export interface EnrichedProduct extends Product {
+export interface EnrichedProduct extends Omit<Product, "brandId"> {
   brandInfo: BrandMetadata;
 }
 
@@ -122,12 +122,14 @@ export async function buildProductCatalog(
   const activeProducts: Product[] = products.filter(
     (product) => product.isActive && brandsMetadata.has(product.brandId),
   );
-  const enrichedProducts: EnrichedProduct[] = activeProducts.map((product) => {
-    return {
-      ...product,
-      brandInfo: brandsMetadata.get(product.brandId)!,
-    };
-  });
+  const enrichedProducts: EnrichedProduct[] = activeProducts.map(
+    ({ brandId, ...product }) => {
+      return {
+        ...product,
+        brandInfo: brandsMetadata.get(brandId)!,
+      };
+    },
+  );
   return enrichedProducts;
 }
 
