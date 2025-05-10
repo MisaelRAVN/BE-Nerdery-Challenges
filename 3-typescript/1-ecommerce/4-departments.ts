@@ -24,22 +24,19 @@ export async function getDepartmentsWithProductCount(
   departments: Department[],
   products: Product[],
 ): Promise<DepartmentInfo[]> {
-  const productDepartmentLookup: Map<number, ProductInfo> = products.reduce(
-    (acc, curr) => {
-      const productInfo: ProductInfo = acc.get(curr.departmentId) ?? {
-        availableProducts: 0,
-        productsNames: [],
-      };
-      productInfo.availableProducts++;
-      productInfo.productsNames.push(curr.name);
+  const productDepartmentLookup = products.reduce((acc, curr) => {
+    const productInfo = acc.get(curr.departmentId) ?? {
+      availableProducts: 0,
+      productsNames: [],
+    };
+    productInfo.availableProducts++;
+    productInfo.productsNames.push(curr.name);
 
-      acc.set(curr.departmentId, productInfo);
-      return acc;
-    },
-    new Map<number, ProductInfo>(),
-  );
+    acc.set(curr.departmentId, productInfo);
+    return acc;
+  }, new Map<number, ProductInfo>());
 
-  const availableDepartments: Department[] = departments.filter((department) =>
+  const availableDepartments = departments.filter((department) =>
     productDepartmentLookup.has(department.id),
   );
   const departmentsWithProductCount: DepartmentInfo[] =

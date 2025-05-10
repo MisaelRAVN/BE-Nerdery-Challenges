@@ -39,39 +39,38 @@ export async function analyzeProductPrices(
     );
   }
 
-  const productPriceAnalysis: ProductPriceAnalysis =
-    products.reduce<ProductPriceAnalysis>(
-      (acc, curr) => {
-        acc.totalPrice += curr.price;
+  const productPriceAnalysis = products.reduce<ProductPriceAnalysis>(
+    (acc, curr) => {
+      acc.totalPrice += curr.price;
 
-        if (curr.price > acc.mostExpensiveProduct.price) {
-          acc.mostExpensiveProduct = curr;
+      if (curr.price > acc.mostExpensiveProduct.price) {
+        acc.mostExpensiveProduct = curr;
+      }
+
+      if (curr.price < acc.cheapestProduct.price) {
+        acc.cheapestProduct = curr;
+      }
+
+      if (curr.onSale) {
+        acc.onSaleCount++;
+        if (curr.salePrice != null) {
+          const currentDiscountPercentage =
+            ((curr.price - curr.salePrice) / curr.price) * 100;
+          acc.averageDiscount += currentDiscountPercentage;
         }
+      }
 
-        if (curr.price < acc.cheapestProduct.price) {
-          acc.cheapestProduct = curr;
-        }
-
-        if (curr.onSale) {
-          acc.onSaleCount++;
-          if (curr.salePrice != null) {
-            const currentDiscountPercentage =
-              ((curr.price - curr.salePrice) / curr.price) * 100;
-            acc.averageDiscount += currentDiscountPercentage;
-          }
-        }
-
-        return acc;
-      },
-      {
-        totalPrice: 0,
-        averagePrice: 0,
-        mostExpensiveProduct: products[0],
-        cheapestProduct: products[0],
-        onSaleCount: 0,
-        averageDiscount: 0,
-      },
-    );
+      return acc;
+    },
+    {
+      totalPrice: 0,
+      averagePrice: 0,
+      mostExpensiveProduct: products[0],
+      cheapestProduct: products[0],
+      onSaleCount: 0,
+      averageDiscount: 0,
+    },
+  );
 
   const averagePrice = productPriceAnalysis.totalPrice / products.length;
   productPriceAnalysis.averagePrice = parseFloat(averagePrice.toFixed(2));
@@ -107,19 +106,16 @@ export async function buildProductCatalog(
   products: Product[],
   brands: Brand[],
 ): Promise<EnrichedProduct[]> {
-  const brandsMetadata: Map<number, BrandMetadata> = brands.reduce(
-    (acc, curr) => {
-      const { id, isActive, ...brandMetadata } = curr;
-      if (isActive) {
-        const brandId: number = typeof id === "number" ? id : parseInt(id);
-        acc.set(brandId, brandMetadata);
-      }
-      return acc;
-    },
-    new Map<number, BrandMetadata>(),
-  );
+  const brandsMetadata = brands.reduce((acc, curr) => {
+    const { id, isActive, ...brandMetadata } = curr;
+    if (isActive) {
+      const brandId = typeof id === "number" ? id : parseInt(id);
+      acc.set(brandId, brandMetadata);
+    }
+    return acc;
+  }, new Map<number, BrandMetadata>());
 
-  const activeProducts: Product[] = products.filter(
+  const activeProducts = products.filter(
     (product) => product.isActive && brandsMetadata.has(product.brandId),
   );
   const enrichedProducts: EnrichedProduct[] = activeProducts.map(
@@ -150,7 +146,7 @@ export async function buildProductCatalog(
 export async function filterProductsWithOneImage(
   products: Product[],
 ): Promise<Product[]> {
-  const productsWithImages: Product[] = products.filter(
+  const productsWithImages = products.filter(
     (product) => product.images.length > 0,
   );
   const productsWithOneImage: Product[] = productsWithImages.map((product) => {

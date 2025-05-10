@@ -20,23 +20,23 @@ export async function getCountriesWithBrandsAndProductCount(
   brands: Brand[],
   products: Product[],
 ): Promise<CountriesInfo> {
-  const brandCountryLookup: Map<number, string> = brands.reduce((acc, curr) => {
+  const brandCountryLookup = brands.reduce((acc, curr) => {
     const { id, headquarters } = curr;
 
-    const locations: string[] = headquarters.split(",");
-    const country: string = locations[locations.length - 1].trim();
+    const locations = headquarters.split(",");
+    const country = locations[locations.length - 1].trim();
 
-    const brandId: number = typeof id === "number" ? id : parseInt(id);
+    const brandId = typeof id === "number" ? id : parseInt(id);
     acc.set(brandId, country);
     return acc;
   }, new Map<number, string>());
 
-  const availableProducts: Product[] = products.filter((product) =>
+  const availableProducts = products.filter((product) =>
     brandCountryLookup.has(product.brandId),
   );
-  const countriesWithBrandsAndProducts: CountriesInfo =
+  const countriesWithBrandsAndProducts =
     availableProducts.reduce<CountriesInfo>((acc, curr) => {
-      const country: string = brandCountryLookup.get(curr.brandId)!;
+      const country = brandCountryLookup.get(curr.brandId)!;
       acc[country] = (acc[country] || 0) + 1;
       return acc;
     }, {});
