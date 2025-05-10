@@ -11,4 +11,19 @@
  * - The function should not use any external libraries
  */
 
-//? implement the function  here
+export function deepClone<T>(objectToCopy: T): T {
+  if (typeof objectToCopy !== "object" || objectToCopy === null) {
+    return objectToCopy;
+  }
+
+  if (Array.isArray(objectToCopy)) {
+    const arrayCopy = objectToCopy.map((element) => deepClone(element)) as T;
+    return arrayCopy;
+  }
+
+  const objectEntriesCopy = Object.entries(objectToCopy).map(
+    ([key, value]) => [key, deepClone(value)],
+  );
+  const objectCopy = Object.fromEntries(objectEntriesCopy) as T;
+  return objectCopy;
+}
