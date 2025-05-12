@@ -40,8 +40,7 @@ FROM
   customer c
   INNER JOIN payment p USING(customer_id)
 GROUP BY
-  first_name,
-  last_name
+  c.customer_id
 ORDER BY
   total_spent DESC
 LIMIT 5;
@@ -158,8 +157,7 @@ FROM
   customer c
   INNER JOIN rental r USING(customer_id)
 GROUP BY
-  first_name,
-  last_name
+  c.customer_id
 ORDER BY
   rental_span_days DESC;
 
@@ -183,8 +181,7 @@ FROM
   INNER JOIN film_category USING(film_id)
   INNER JOIN category cat USING(category_id)
 GROUP BY
-  first_name,
-  last_name
+  c.customer_id
 HAVING
   COUNT(DISTINCT cat.category_id) < (
     SELECT
