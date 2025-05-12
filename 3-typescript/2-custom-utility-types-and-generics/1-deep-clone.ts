@@ -21,9 +21,10 @@ export function deepClone<T>(objectToCopy: T): T {
     return arrayCopy;
   }
 
-  const objectEntriesCopy = Object.entries(objectToCopy).map(
-    ([key, value]) => [key, deepClone(value)],
-  );
+  const objectEntriesCopy = Object.entries(objectToCopy).map(([key, value]) => [
+    key,
+    deepClone(value),
+  ]);
   const objectCopy = Object.fromEntries(objectEntriesCopy) as T;
   return objectCopy;
 }
