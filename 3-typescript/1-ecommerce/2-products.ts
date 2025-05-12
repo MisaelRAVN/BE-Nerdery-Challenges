@@ -1,4 +1,6 @@
 import { Product, Brand } from "./1-types";
+import { readJsonFile } from "./utils/read-json.util";
+import { join } from "path";
 
 /**
  * Products - Challenge 1: Product Price Analysis
@@ -157,3 +159,27 @@ export async function filterProductsWithOneImage(
   });
   return productsWithOneImage;
 }
+
+const main = async () => {
+  const products: Product[] = await readJsonFile(
+    join(__dirname, "./data/products.json"),
+  );
+  const brands: Brand[] = await readJsonFile(
+    join(__dirname, "./data/brands.json"),
+  );
+
+  const productsAnalysis = await analyzeProductPrices(products);
+  const catalog = await buildProductCatalog(products, brands);
+  const productsWithOneImage = await filterProductsWithOneImage(products);
+
+  console.log("analyzeProductPrices() demo:");
+  console.log(productsAnalysis);
+
+  console.log("buildProductCatalog() demo:");
+  console.log(catalog);
+
+  console.log("filterProductsWithOneImage() demo:");
+  console.log(productsWithOneImage);
+};
+
+main();

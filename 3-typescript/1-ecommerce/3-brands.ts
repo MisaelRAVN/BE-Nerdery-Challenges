@@ -1,4 +1,6 @@
 import { Brand, Product } from "./1-types";
+import { readJsonFile } from "./utils/read-json.util";
+import { join } from "path";
 
 /**
  *  Challenge 4: Get Countries with Brands and Amount of Products
@@ -43,3 +45,22 @@ export async function getCountriesWithBrandsAndProductCount(
 
   return countriesWithBrandsAndProducts;
 }
+
+const main = async () => {
+  const products: Product[] = await readJsonFile(
+    join(__dirname, "./data/products.json"),
+  );
+  const brands: Brand[] = await readJsonFile(
+    join(__dirname, "./data/brands.json"),
+  );
+
+  const countriesInfo = await getCountriesWithBrandsAndProductCount(
+    brands,
+    products,
+  );
+
+  console.log("getCountriesWithBrandsAndProductCount() demo:");
+  console.log(countriesInfo);
+};
+
+main();

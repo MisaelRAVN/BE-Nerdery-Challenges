@@ -1,4 +1,6 @@
 import { Department, Product } from "./1-types";
+import { readJsonFile } from "./utils/read-json.util";
+import { join } from "path";
 
 /**
  *  Challenge 5: Get Departments with Product Count
@@ -50,3 +52,22 @@ export async function getDepartmentsWithProductCount(
     });
   return departmentsWithProductCount;
 }
+
+const main = async () => {
+  const departments: Department[] = await readJsonFile(
+    join(__dirname, "./data/departments.json"),
+  );
+  const products: Product[] = await readJsonFile(
+    join(__dirname, "./data/products.json"),
+  );
+
+  const departmentsInfo = await getDepartmentsWithProductCount(
+    departments,
+    products,
+  );
+
+  console.log("getDepartmentsWithProductCount() demo:");
+  console.log(departmentsInfo);
+};
+
+main();
