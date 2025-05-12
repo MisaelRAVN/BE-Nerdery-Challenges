@@ -1,3 +1,7 @@
+import { Brand, Product } from "./1-types";
+import { readJsonFile } from "./utils/read-json.util";
+import { join } from "path";
+
 /**
  *  Challenge 4: Get Countries with Brands and Amount of Products
  *
@@ -12,10 +16,51 @@
  * - The return should be a type that allow us to define the country name as a key and the amount of products as a value.
  */
 
-async function getCountriesWithBrandsAndProductCount(
-  brands: unknown[],
-  products: unknown[],
-): Promise<unknown> {
-  // Implement the function logic here
-  return;
+export type CountriesInfo = Record<string, number>;
+
+export async function getCountriesWithBrandsAndProductCount(
+  brands: Brand[],
+  products: Product[],
+): Promise<CountriesInfo> {
+  const brandCountryLookup = brands.reduce((acc, curr) => {
+    const { id, headquarters } = curr;
+
+    const locations = headquarters.split(",");
+    const country = locations[locations.length - 1].trim();
+
+    const brandId = typeof id === "number" ? id : parseInt(id);
+    acc.set(brandId, country);
+    return acc;
+  }, new Map<number, string>());
+
+  const availableProducts = products.filter((product) =>
+    brandCountryLookup.has(product.brandId),
+  );
+  const countriesWithBrandsAndProducts =
+    availableProducts.reduce<CountriesInfo>((acc, curr) => {
+      const country = brandCountryLookup.get(curr.brandId)!;
+      acc[country] = (acc[country] || 0) + 1;
+      return acc;
+    }, {});
+
+  return countriesWithBrandsAndProducts;
 }
+
+const main = async () => {
+  const products: Product[] = await readJsonFile(
+    join(__dirname, "./data/products.json"),
+  );
+  const brands: Brand[] = await readJsonFile(
+    join(__dirname, "./data/brands.json"),
+  );
+
+  const countriesInfo = await getCountriesWithBrandsAndProductCount(
+    brands,
+    products,
+  );
+
+  console.log("getCountriesWithBrandsAndProductCount() demo:");
+  console.log(countriesInfo);
+};
+
+main();

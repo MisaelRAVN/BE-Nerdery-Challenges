@@ -1,3 +1,7 @@
+import { Product, Brand } from "./1-types";
+import { readJsonFile } from "./utils/read-json.util";
+import { join } from "path";
+
 /**
  * Products - Challenge 1: Product Price Analysis
  *
@@ -19,7 +23,66 @@
  *
  **/
 
-async function analyzeProductPrices(products: any[]): Promise<any> {}
+export interface ProductPriceAnalysis {
+  totalPrice: number;
+  averagePrice: number;
+  mostExpensiveProduct: Product;
+  cheapestProduct: Product;
+  onSaleCount: number;
+  averageDiscount: number;
+}
+
+export async function analyzeProductPrices(
+  products: Product[],
+): Promise<ProductPriceAnalysis> {
+  if (products.length === 0) {
+    throw new Error(
+      "Product list is empty. Cannot compute average, most expensive, nor cheapest product",
+    );
+  }
+
+  const productPriceAnalysis = products.reduce<ProductPriceAnalysis>(
+    (acc, curr) => {
+      acc.totalPrice += curr.price;
+
+      if (curr.price > acc.mostExpensiveProduct.price) {
+        acc.mostExpensiveProduct = curr;
+      }
+
+      if (curr.price < acc.cheapestProduct.price) {
+        acc.cheapestProduct = curr;
+      }
+
+      if (curr.onSale) {
+        acc.onSaleCount++;
+        if (curr.salePrice != null) {
+          const currentDiscountPercentage =
+            ((curr.price - curr.salePrice) / curr.price) * 100;
+          acc.averageDiscount += currentDiscountPercentage;
+        }
+      }
+
+      return acc;
+    },
+    {
+      totalPrice: 0,
+      averagePrice: 0,
+      mostExpensiveProduct: products[0],
+      cheapestProduct: products[0],
+      onSaleCount: 0,
+      averageDiscount: 0,
+    },
+  );
+
+  const averagePrice = productPriceAnalysis.totalPrice / products.length;
+  productPriceAnalysis.averagePrice = parseFloat(averagePrice.toFixed(2));
+
+  const averageDiscount =
+    productPriceAnalysis.averageDiscount / productPriceAnalysis.onSaleCount;
+  productPriceAnalysis.averageDiscount = parseFloat(averageDiscount.toFixed(2));
+
+  return productPriceAnalysis;
+}
 
 /**
  *  Challenge 2: Build a Product Catalog with Brand Metadata
@@ -35,11 +98,37 @@ async function analyzeProductPrices(products: any[]): Promise<any> {}
   - The brandInfo field should include the rest of the brand metadata (name, logo, description, etc.).
  */
 
-async function buildProductCatalog(
-  products: unknown[],
-  brands: unknown[],
-): Promise<unknown[]> {
-  return [];
+type BrandMetadata = Omit<Brand, "id" | "isActive">;
+
+export interface EnrichedProduct extends Omit<Product, "brandId"> {
+  brandInfo: BrandMetadata;
+}
+
+export async function buildProductCatalog(
+  products: Product[],
+  brands: Brand[],
+): Promise<EnrichedProduct[]> {
+  const brandsMetadata = brands.reduce((acc, curr) => {
+    const { id, isActive, ...brandMetadata } = curr;
+    if (isActive) {
+      const brandId = typeof id === "number" ? id : parseInt(id);
+      acc.set(brandId, brandMetadata);
+    }
+    return acc;
+  }, new Map<number, BrandMetadata>());
+
+  const activeProducts = products.filter(
+    (product) => product.isActive && brandsMetadata.has(product.brandId),
+  );
+  const enrichedProducts: EnrichedProduct[] = activeProducts.map(
+    ({ brandId, ...product }) => {
+      return {
+        ...product,
+        brandInfo: brandsMetadata.get(brandId)!,
+      };
+    },
+  );
+  return enrichedProducts;
 }
 
 /**
@@ -56,10 +145,41 @@ async function buildProductCatalog(
  * - Use proper TypeScript typing for parameters and return values.
  */
 
-async function filterProductsWithOneImage(
-  products: unknown[],
-): Promise<unknown[]> {
-  // Implement the function logic here
-
-  return [];
+export async function filterProductsWithOneImage(
+  products: Product[],
+): Promise<Product[]> {
+  const productsWithImages = products.filter(
+    (product) => product.images.length > 0,
+  );
+  const productsWithOneImage: Product[] = productsWithImages.map((product) => {
+    return {
+      ...product,
+      images: [product.images[0]],
+    };
+  });
+  return productsWithOneImage;
 }
+
+const main = async () => {
+  const products: Product[] = await readJsonFile(
+    join(__dirname, "./data/products.json"),
+  );
+  const brands: Brand[] = await readJsonFile(
+    join(__dirname, "./data/brands.json"),
+  );
+
+  const productsAnalysis = await analyzeProductPrices(products);
+  const catalog = await buildProductCatalog(products, brands);
+  const productsWithOneImage = await filterProductsWithOneImage(products);
+
+  console.log("analyzeProductPrices() demo:");
+  console.log(productsAnalysis);
+
+  console.log("buildProductCatalog() demo:");
+  console.log(catalog);
+
+  console.log("filterProductsWithOneImage() demo:");
+  console.log(productsWithOneImage);
+};
+
+main();
