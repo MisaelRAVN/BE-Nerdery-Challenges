@@ -60,8 +60,7 @@ LIMIT 5;
 
 -- your query here
 SELECT
-  f.title,
-  MAX(r.rental_date)
+  f.title
 FROM
   film f
   INNER JOIN inventory USING(film_id)
