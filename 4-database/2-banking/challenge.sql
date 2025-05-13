@@ -54,7 +54,7 @@ DECLARE
   sender_balance NUMERIC(12, 2);
   sender_status TEXT;
   recipient_status TEXT;
-  transfer_uuid_reference TEXT;
+  transfer_uuid_reference UUID := uuid_generate_v4();
 BEGIN
   -- Prevent transfers to the same account
   IF from_id = to_id THEN
@@ -107,13 +107,10 @@ BEGIN
   WHERE account_id = to_id;
 
   -- Log two transactions: a withdrawal and a deposit, both linked by the same UUID reference
-  SELECT gen_random_uuid()
-  INTO transfer_uuid_reference;
-
   INSERT INTO banking.transactions(account_id, amount, transaction_type, reference)
   values
-    (from_id, amount, 'withdrawal', transfer_uuid_reference),
-    (to_id, amount, 'deposit', transfer_uuid_reference);
+    (from_id, amount, 'withdrawal', transfer_uuid_reference::TEXT),
+    (to_id, amount, 'deposit', transfer_uuid_reference::TEXT);
   
   raise info 'Processed withdrawal of amount % from user % with reference %',
     amount, from_id, transfer_uuid_reference;
