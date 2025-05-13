@@ -10,6 +10,16 @@
 
 
 -- your query here
+SELECT
+  c.name category,
+  COUNT(fc.film_id) film_count
+FROM
+  category c
+  INNER JOIN film_category fc USING(category_id)
+GROUP BY
+  category
+ORDER BY
+  category;
 
 
  /*
@@ -22,6 +32,18 @@
  */
 
  -- your query here
+SELECT
+  c.first_name,
+  c.last_name,
+  SUM(p.amount) total_spent
+FROM
+  customer c
+  INNER JOIN payment p USING(customer_id)
+GROUP BY
+  c.customer_id
+ORDER BY
+  total_spent DESC
+LIMIT 5;
 
 
 
@@ -37,6 +59,18 @@
 
 
 -- your query here
+SELECT
+  f.title
+FROM
+  film f
+  INNER JOIN inventory USING(film_id)
+  INNER JOIN rental r USING(inventory_id)
+GROUP BY
+  title
+HAVING
+  MAX(r.rental_date) >= NOW() - INTERVAL '10 years'
+ORDER BY
+  title;
 
 
 /*
@@ -49,6 +83,15 @@
 
 
 -- your query here
+SELECT
+  f.title,
+  i.inventory_id
+FROM
+  film f
+  INNER JOIN inventory i USING(film_id)
+  LEFT JOIN rental r USING(inventory_id)
+WHERE
+  r.inventory_id IS NULL;
 
 
 
@@ -60,7 +103,34 @@
     - title should display the name of each film
     - rental_count should show the total number of times the film was rented
 */
+WITH film_rental_count AS (
+  SELECT
+    f.title,
+    COUNT(r.rental_id) rental_count
+  FROM
+    film f
+    INNER JOIN inventory i USING(film_id)
+    INNER JOIN rental r USING(inventory_id)
+  GROUP BY
+    title
+  ORDER BY
+    title
+)
 
+SELECT
+  title,
+  rental_count
+FROM
+  film_rental_count
+WHERE
+  rental_count > (
+    SELECT
+      AVG(rental_count)
+    FROM
+      film_rental_count
+  )
+ORDER BY
+  title;
 
 
 -- your query here
@@ -76,6 +146,19 @@
 */
 
 -- your query here
+SELECT
+  c.first_name,
+  c.last_name,
+  MIN(r.rental_date) first_rental,
+  MAX(r.rental_date) last_rental,
+  MAX(r.rental_date) - MIN(r.rental_date) rental_span_days
+FROM
+  customer c
+  INNER JOIN rental r USING(customer_id)
+GROUP BY
+  c.customer_id
+ORDER BY
+  rental_span_days DESC;
 
 /*
     Challenge 7.
@@ -86,6 +169,28 @@
 
 
 -- your query here
+SELECT
+  c.first_name,
+  c.last_name
+FROM
+  customer c
+  LEFT JOIN rental USING(customer_id)
+  LEFT JOIN inventory USING(inventory_id)
+  LEFT JOIN film USING(film_id)
+  LEFT JOIN film_category USING(film_id)
+  LEFT JOIN category cat USING(category_id)
+GROUP BY
+  c.customer_id
+HAVING
+  COUNT(DISTINCT cat.category_id) < (
+    SELECT
+      COUNT(category_id)
+    FROM
+      category
+  )
+ORDER BY
+  first_name,
+  last_name;
 
 /*
     Bonus Challenge 8 (opt)
@@ -98,5 +203,21 @@
 
 -- your query here
 
+-- -- Partial progress
 
-
+-- SELECT
+--   f.title,
+--   c.name category,
+--   COUNT(r.rental_id) rental_count,
+--   SUM(p.amount) total_revenue
+-- FROM
+--   category c
+--   INNER JOIN film_category USING(category_id)
+--   INNER JOIN film f USING(film_id)
+--   INNER JOIN inventory USING(film_id)
+--   INNER JOIN rental r USING(inventory_id)
+--   INNER JOIN payment p USING(rental_id)
+-- GROUP BY
+--   f.title,
+--   category_id,
+--   c.name;
