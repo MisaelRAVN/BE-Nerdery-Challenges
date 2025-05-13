@@ -98,6 +98,8 @@ BEGIN
   END IF;
 
   -- Debit the sender and credit the recipient atomically
+  BEGIN
+
   UPDATE banking.accounts
   SET balance = balance - amount
   WHERE account_id = from_id;
@@ -118,6 +120,11 @@ BEGIN
     amount, to_id, transfer_uuid_reference;
 
   RETURN 'Transaction completed successfully!';
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      RAISE EXCEPTION 'Transfer failed: %', SQLERRM;
+  END;
 END;
 $$;
 
