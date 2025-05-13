@@ -174,11 +174,11 @@ SELECT
   c.last_name
 FROM
   customer c
-  INNER JOIN rental USING(customer_id)
-  INNER JOIN inventory USING(inventory_id)
-  INNER JOIN film USING(film_id)
-  INNER JOIN film_category USING(film_id)
-  INNER JOIN category cat USING(category_id)
+  LEFT JOIN rental USING(customer_id)
+  LEFT JOIN inventory USING(inventory_id)
+  LEFT JOIN film USING(film_id)
+  LEFT JOIN film_category USING(film_id)
+  LEFT JOIN category cat USING(category_id)
 GROUP BY
   c.customer_id
 HAVING
