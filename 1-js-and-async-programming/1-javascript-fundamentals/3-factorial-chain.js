@@ -38,11 +38,10 @@ const factorialChain = (number, lastDigits) => {
     const moduloForLastDigits = 10 ** lastDigits;
 
     for (let i = 1; i <= number; i++) {
-        currentFactorialMod *= i;
-        currentFactorialMod %= moduloForLastDigits;
-
-        factorialsSumMod += currentFactorialMod;
-        factorialsSumMod %= moduloForLastDigits;
+        currentFactorialMod =
+            (currentFactorialMod * i) % moduloForLastDigits;
+        factorialsSumMod =
+            (factorialsSumMod + currentFactorialMod) % moduloForLastDigits;
     }
 
     return factorialsSumMod.toString().padStart(lastDigits, '0');
