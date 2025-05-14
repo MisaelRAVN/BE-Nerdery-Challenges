@@ -19,6 +19,19 @@ findMajorityElement([1, 2, 3, 4, 5]); // Expected output: null
 
 */
 
-const findMajorityElement = (arr) => {};
+const findMajorityElement = (arr) => {
+    const requiredFrequency = arr.length / 2;
+
+    const frequencies = new Map();
+    for (const element of arr) {
+        const currentFrequency = frequencies.get(element) ?? 0;
+        frequencies.set(element, currentFrequency + 1);
+        
+        if (frequencies.get(element) > requiredFrequency)
+            return element;
+    }
+
+    return null;
+};
 
 module.exports = findMajorityElement;
