@@ -34,7 +34,7 @@ Requirements:
 const palindromeCounter = (text, minLength) => {
     let palindromeCount = 0;
 
-    const textWithoutPunctuation = text.replace(/[^\w\s\']/, '');
+    const textWithoutPunctuation = text.replace(/[^\w\s]/g, '');
     const words = textWithoutPunctuation.toLowerCase().split(' ');
     words.forEach(word => {
         if (word.length < minLength)
