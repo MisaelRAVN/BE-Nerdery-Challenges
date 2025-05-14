@@ -25,31 +25,27 @@ const {
  * @returns {Promise<string>} Logs the subscription name as a string.
  */
 const getCommonDislikedSubscription = async () => {
-  const harshestUsers = [];
   const [users, likedMovies, dislikedMovies] = await Promise.all([
     getUsers(),
     getLikedMovies(),
     getDislikedMovies(),
   ]);
 
-  const getUserRatedMoviesCount = (user, movies) => {
-    const userRatedMovies = movies.find(
-      (ratedMovie) => ratedMovie.userId === user.id,
-    );
-    const userRatedMoviesCount = userRatedMovies?.movies.length ?? 0;
-    return userRatedMoviesCount;
+  const getMovieCountMapByUserId = (movies) => {
+    return movies.reduce((acc, curr) => {
+      acc.set(curr.userId, curr.movies?.length ?? 0);
+      return acc;
+    }, new Map());
   };
 
-  for (const user of users) {
-    const [dislikedMoviesCount, likedMoviesCount] = [
-      getUserRatedMoviesCount(user, dislikedMovies),
-      getUserRatedMoviesCount(user, likedMovies),
-    ];
+  const likedMoviesCount = getMovieCountMapByUserId(likedMovies);
+  const dislikedMoviesCount = getMovieCountMapByUserId(dislikedMovies);
 
-    if (dislikedMoviesCount > likedMoviesCount) {
-      harshestUsers.push(user);
-    }
-  }
+  const harshestUsers = users.filter((user) => {
+    const likes = likedMoviesCount.get(user.id) ?? 0;
+    const dislikes = dislikedMoviesCount.get(user.id) ?? 0;
+    return dislikes > likes;
+  });
 
   const subscriptionsPromises = harshestUsers.map((user) =>
     getUserSubscriptionByUserId(user.id),
